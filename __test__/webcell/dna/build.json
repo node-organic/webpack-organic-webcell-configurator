@@ -1,0 +1,6 @@
+{
+  "organelle": {
+    "source": "./organelles/impl1",
+    "dnaKey1": "test"
+  }
+}
