@@ -24,3 +24,20 @@ const webpackConfig = {
 
 module.exports = webcell(options, webpackConfig)
 ```
+
+### webpackConfig argument as function
+
+```
+module.exports = webcell(options, function (dna) { 
+  return webpackConfig 
+})
+```
+
+### webpackConfig argument as Promise/async function
+
+```
+module.exports = webcell(options, async function (dna) { 
+  // ... await async operations
+  return webpackConfig 
+})
+```

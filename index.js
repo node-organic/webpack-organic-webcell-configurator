@@ -35,8 +35,13 @@ module.exports = async function (options, baseWebpackConfig) {
       dnaMode: options.dnaMode || process.env.CELL_MODE
     }, async (err, dna) => {
       if (err) return reject(err)
-
       let result = await renderDNA(dna, options)
+      if (typeof baseWebpackConfig === 'function') {
+        baseWebpackConfig = baseWebpackConfig(dna)
+        if (baseWebpackConfig instanceof Promise) {
+          baseWebpackConfig = await baseWebpackConfig.then()
+        }
+      }
       baseWebpackConfig.plugins = baseWebpackConfig.plugins || []
       baseWebpackConfig.plugins.push(new InjectPlugin(function () {
         return result
