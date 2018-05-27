@@ -1,6 +1,7 @@
 const loadDNA = require('organic-dna-loader')
 const InjectPlugin = require('webpack-inject-plugin').default
 const resolveModule = require('resolve')
+const selectBranch = require('organic-dna-branches').selectBranch
 
 const resolveModulePath = async function (modulepath, options) {
   let basedir = options.basedir || process.cwd()
@@ -35,7 +36,11 @@ module.exports = async function (options, baseWebpackConfig) {
       dnaMode: options.dnaMode || process.env.CELL_MODE
     }, async (err, dna) => {
       if (err) return reject(err)
-      let result = await renderDNA(dna, options)
+      let clientDNA = dna
+      if (options.selectBranch) {
+        clientDNA = selectBranch(dna, options.selectBranch)
+      }
+      let result = await renderDNA(clientDNA, options)
       if (typeof baseWebpackConfig === 'function') {
         baseWebpackConfig = baseWebpackConfig(dna)
         if (baseWebpackConfig instanceof Promise) {
