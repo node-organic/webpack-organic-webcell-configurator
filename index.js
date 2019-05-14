@@ -30,7 +30,7 @@ const renderDNA = async function (dna, options) {
 
 module.exports = async function (options, baseWebpackConfig) {
   if (!options.dnaSourcePaths) throw new Error('dnaSourcePaths not provided in options')
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     loadDNA({
       dnaSourcePaths: options.dnaSourcePaths,
       dnaMode: options.dnaMode || process.env.CELL_MODE
@@ -39,6 +39,9 @@ module.exports = async function (options, baseWebpackConfig) {
       let clientDNA = dna
       if (options.selectBranch) {
         clientDNA = selectBranch(dna, options.selectBranch)
+      }
+      if (typeof options.transformBranch === 'function') {
+        clientDNA = await options.transformBranch(clientDNA)
       }
       let result = await renderDNA(clientDNA, options)
       if (typeof baseWebpackConfig === 'function') {

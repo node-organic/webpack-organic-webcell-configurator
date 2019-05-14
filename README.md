@@ -13,8 +13,8 @@ configure webpack.config.js to build organic frontend web cells
 #### options
 
 * `dnaSourcePaths` - Array, holds full paths to dna source directories to load
-* `selectBranch` - String, dot notated branch path to select for inclusion into the bundle. 
-Leave undefined to use the whole dna.
+* `selectBranch` - String, dot notated branch path to select for inclusion into the bundle. Leave undefined to use the whole dna.
+* `transformBranch` - Function, optional. Used to transform async selected branch. Has signature `async function transformBranch (selectedBranch)` resolving to a DNA branch to be bundled.
 * `buildBranch` - String, branch name within selected dna to transform any organelle `source` property paths as `require`s
 * `exportName` - String, defaults to `window.DNA` value which will be used to globally 
 provide the bundled DNA
