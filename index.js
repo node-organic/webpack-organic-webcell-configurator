@@ -29,32 +29,35 @@ const renderDNA = async function (dna, options) {
 }
 
 module.exports = async function (options, baseWebpackConfig) {
-  if (!options.dnaSourcePaths) throw new Error('dnaSourcePaths not provided in options')
+  if (!options.dnaSourcePaths && !options.dnaLoader) throw new Error('dnaSourcePaths or dnaLoader not provided in options')
   return new Promise(async (resolve, reject) => {
-    loadDNA({
-      dnaSourcePaths: options.dnaSourcePaths,
-      dnaMode: options.dnaMode || process.env.CELL_MODE
-    }, async (err, dna) => {
-      if (err) return reject(err)
-      let clientDNA = dna
-      if (options.selectBranch) {
-        clientDNA = selectBranch(dna, options.selectBranch)
+    let dna
+    if (options.dnaLoader) {
+      dna = await options.dnaLoader(options.dnaMode || process.env.CELL_MODE)
+    } else {
+      dna = await loadDNA({
+        dnaSourcePaths: options.dnaSourcePaths,
+        dnaMode: options.dnaMode || process.env.CELL_MODE
+      })
+    }
+    let clientDNA = dna
+    if (options.selectBranch) {
+      clientDNA = selectBranch(dna, options.selectBranch)
+    }
+    if (typeof options.transformBranch === 'function') {
+      clientDNA = await options.transformBranch(clientDNA)
+    }
+    let result = await renderDNA(clientDNA, options)
+    if (typeof baseWebpackConfig === 'function') {
+      baseWebpackConfig = baseWebpackConfig(dna)
+      if (baseWebpackConfig instanceof Promise) {
+        baseWebpackConfig = await baseWebpackConfig.then()
       }
-      if (typeof options.transformBranch === 'function') {
-        clientDNA = await options.transformBranch(clientDNA)
-      }
-      let result = await renderDNA(clientDNA, options)
-      if (typeof baseWebpackConfig === 'function') {
-        baseWebpackConfig = baseWebpackConfig(dna)
-        if (baseWebpackConfig instanceof Promise) {
-          baseWebpackConfig = await baseWebpackConfig.then()
-        }
-      }
-      baseWebpackConfig.plugins = baseWebpackConfig.plugins || []
-      baseWebpackConfig.plugins.push(new InjectPlugin(function () {
-        return result
-      }))
-      resolve(baseWebpackConfig)
-    })
+    }
+    baseWebpackConfig.plugins = baseWebpackConfig.plugins || []
+    baseWebpackConfig.plugins.push(new InjectPlugin(function () {
+      return result
+    }))
+    resolve(baseWebpackConfig)
   })
 }
