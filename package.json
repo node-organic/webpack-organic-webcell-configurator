@@ -1,7 +1,7 @@
 {
   "name": "webpack-organic-webcell-configurator",
   "description": "configure webpack.config.js to build organic frontend web cells",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "scripts": {
     "test": "jest",
     "release-patch": "npm run test && npm version patch && npm publish && git push --tags && git push origin master",
